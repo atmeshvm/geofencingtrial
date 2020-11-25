@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+ <head>
+      <script src = "https://maps.googleapis.com/maps/api/js"></script>
+  </script>
+<body>
+
+<p>Enter Radius and click the button </p>
+<label for="rads">Enter the radius (in m) of the geofenced region:</label>
+  <input type="number" id="rads_quan" name="rads"><br>
+<label for="lans">Enter Latitude of center:</label>
+  <input type="number" id="lans_quan" name="lans"><br>
+<label for="lons">Enter Longitude of center:</label>
+  <input type="number" id="lons_quan" name="lons"><br>
+<button onclick="getLocation()"> Geofence </button>
+
+<p id="demo"></p>
+
+<div id = "sample" style = "width:580px; height:400px;"></div>
+    <div id="msg"></div><br>
+	<div id="msg1"></div>
+<script>
+var x = document.getElementById("demo");
+var r = document.getElementById("rads_quan");
+var lo = document.getElementById("lons_quan");
+var la = document.getElementById("lans_quan");
+function haversine_distance(mk1, mk2) {
+      var R = 6378.1; // Radius of the Earth in km
+      var rlat1 = mk1.position.lat() * (Math.PI/180); // Convert degrees to radians
+      var rlat2 = mk2.position.lat() * (Math.PI/180); // Convert degrees to radians
+      var difflat = rlat2-rlat1; // Radian difference (latitudes)
+      var difflon = (mk2.position.lng()-mk1.position.lng()) * (Math.PI/180); // Radian difference (longitudes)
+
+      var d = 2000 * R * Math.asin(Math.sqrt(Math.sin(difflat/2)*Math.sin(difflat/2)+Math.cos(rlat1)*Math.cos(rlat2)*Math.sin(difflon/2)*Math.sin(difflon/2)));
+      return d;
+    }
+
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(showPosition);
+  } else { 
+    x.innerHTML = "Geolocation is not supported by this browser.";
+  }
+}
+    
+function showPosition(position) {
+    x.innerHTML= "Your Location: <br>" + "Latitude: " + position.coords.latitude + 
+    "<br>Longitude: " + position.coords.longitude;
+	var mapOptions = {
+               center:new google.maps.LatLng(12.9170984, 77.644112),
+               zoom:7
+            }
+				
+    var map = new google.maps.Map(document.getElementById("sample"),mapOptions);
+            
+    var marker1 = new google.maps.Marker({
+               position: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+               map: map, title: "Your Location"
+            });
+	var marker2 = new google.maps.Marker({
+               position: new google.maps.LatLng(la.value, lo.value),
+               map: map, title: "The Center"
+            });
+
+  var distance = haversine_distance(marker1, marker2);
+  document.getElementById('msg').innerHTML = "Distance from center: " + distance.toFixed(2) + " m" + "<br> Radius is " + r.value;
+  if(distance < r.value)
+  document.getElementById('msg1').innerHTML = "Your location lies within the geofence";
+  else
+  document.getElementById('msg1').innerHTML = "Your location does not lie in the geofence";
+}
+</script>
+
+</body>
+</html>
+
+            
